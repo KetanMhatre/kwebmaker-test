@@ -1,103 +1,148 @@
-import Image from "next/image";
+import { fetchGraphQL } from '../../lib/graphql';
+import { HOMEPAGE_QUERY } from '../../lib/queries';
 
-export default function Home() {
+export default async function HomePage() {
+  let homepage = null;
+  try {
+    const data = await fetchGraphQL(HOMEPAGE_QUERY);
+    homepage = data?.pages?.nodes?.[0]?.homepage;
+  } catch (error) {
+    console.error('error : ', error);
+    return <h1>Failed to load data</h1>;
+  }
+  console.log(homepage);
+
+  if (!homepage) return <h1>No homepage data found</h1>;
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className='font-sans'>
+      {homepage.banners?.[0]?.bannerImage?.node?.sourceUrl && (
+        <section className='relative w-full overflow-hidden mb-12'>
+          <img
+            src={homepage.banners[0].bannerImage.node.sourceUrl}
+            alt={homepage.banners[0].bannersTitle}
+            className='w-full h-auto max-h-[700px] object-cover'
+          />
+          <div className='absolute inset-0 bg-black/60 flex flex-col justify-center text-center p-6 md:p-16 text-white'>
+            <h2 className='text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-4 shadow-md tracking-tight leading-tight'>
+              {homepage.banners[0].bannersTitle}
+            </h2>
+            <p className='text-base sm:text-lg md:text-xl lg:text-2xl shadow-md max-w-4xl mx-auto'>
+              {homepage.banners[0].bannerDescription}
+            </p>
+          </div>
+        </section>
+      )}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
+      <section className='text-center mb-16 px-4'>
+        <h3 className='text-4xl md:text-5xl font-bold text-gray-800 mb-2'>
+          {homepage.blogSubtitle}
+        </h3>
+        <p className='text-2xl md:text-3xl text-gray-600 font-medium'>
+          {homepage.blogTitle}
+        </p>
+      </section>
+
+      <section className='px-4 mb-20'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8'>
+          {homepage.categories.map((cat, index) => (
+            <div
+              key={index}
+              className='group relative bg-white rounded-3xl shadow-xl hover:shadow-2xl overflow-hidden transform transition duration-300 hover:-translate-y-1'
+            >
+              <div className='overflow-hidden'>
+                <img
+                  src={cat.image.node.sourceUrl}
+                  alt={cat.title}
+                  className='w-full h-[250px] object-cover transform transition-transform duration-300 group-hover:scale-105'
+                />
+              </div>
+              <div className='p-6 flex flex-col items-center text-center'>
+                <h2 className='text-xl md:text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors'>
+                  {cat.title}
+                </h2>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className='flex flex-col lg:flex-row items-center bg-gray-50 p-6 md:p-12 mb-16 gap-8'>
+        <img
+          src={homepage.homeAboutVideoImage?.node?.sourceUrl}
+          alt='About Astral Paints'
+          className='w-full lg:w-1/2 rounded-2xl shadow-md object-cover'
+        />
+        <div className='lg:w-1/2 space-y-4'>
+          <h2 className='text-3xl md:text-4xl font-bold text-gray-800'>
+            {homepage.homeAboutTitle}
+          </h2>
+          <h3 className='text-xl text-blue-600 font-semibold'>
+            {homepage.homeAboutSubtitle}
+          </h3>
+          <div
+            className='text-gray-700 text-base leading-relaxed'
+            dangerouslySetInnerHTML={{ __html: homepage.homeAboutDescription }}
+          />
           <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            href={homepage.homeAboutButton?.url}
+            target={homepage.homeAboutButton?.target}
+            className='inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition'
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
+            {homepage.homeAboutButton?.title}
           </a>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+      </section>
+
+      <section className='text-center py-12 px-4 bg-white mb-16'>
+        <h3 className='text-3xl font-bold text-gray-800 mb-2'>
+          {homepage.homeServicesSubtitle}
+        </h3>
+        <p className='text-2xl text-gray-600'>{homepage.homeServicesTitle}</p>
+      </section>
+
+      <section className='bg-gradient-to-br from-blue-50 to-white py-12 px-4 text-center mb-16'>
+        <h3 className='text-3xl md:text-4xl font-bold text-blue-800 mb-2'>
+          {homepage.homeColoursSubtitle}
+        </h3>
+        <p className='text-xl md:text-2xl text-gray-700 mb-6'>
+          {homepage.homeColoursTitle}
+        </p>
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          href={homepage.homeColoursButton?.url}
+          target={homepage.homeColoursButton?.target}
+          className='inline-block px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition'
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
+          {homepage.homeColoursButton?.title}
         </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+      </section>
+
+      <section className='relative mb-16'>
+        <img
+          src={homepage.homeJoinBackgroundImage?.node?.sourceUrl}
+          alt='Become A Dealer'
+          className='w-full h-[400px] object-cover rounded-lg'
+        />
+        <div className='absolute inset-0 bg-black/60 flex flex-col justify-center items-center text-white p-6 text-center'>
+          <h2 className='text-4xl md:text-5xl font-bold mb-2'>
+            {homepage.homeJoinTitle}
+          </h2>
+          <h3 className='text-xl md:text-2xl mb-4'>
+            {homepage.homeJoinSubtitle}
+          </h3>
+          <div
+            className='text-base md:text-lg mb-4'
+            dangerouslySetInnerHTML={{ __html: homepage.homeJoinDescription }}
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <a
+            href={homepage.homeJoinButton?.url}
+            target={homepage.homeJoinButton?.target}
+            className='inline-block px-6 py-2 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition'
+          >
+            {homepage.homeJoinButton?.title}
+          </a>
+        </div>
+      </section>
     </div>
   );
 }
