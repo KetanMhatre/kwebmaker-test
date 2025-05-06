@@ -21,7 +21,7 @@ export default async function HomePage() {
           <img
             src={homepage.banners[0].bannerImage.node.sourceUrl}
             alt={homepage.banners[0].bannersTitle}
-            className='w-full h-auto max-h-[700px] object-cover'
+            className='w-full object-cover min-h-[500px] sm:min-h-[600px] md:min-h-[700px] lg:min-h-[800px] max-h-[700px]'
           />
           <div className='absolute inset-0 bg-black/60 flex flex-col justify-center text-center p-6 md:p-16 text-white'>
             <h2 className='text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-4 shadow-md tracking-tight leading-tight'>
